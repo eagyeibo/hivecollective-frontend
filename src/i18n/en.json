@@ -1,0 +1,131 @@
+{
+  "nav": {
+    "problems": "Problems",
+    "postProblem": "+ Post problem",
+    "signIn": "Sign in",
+    "join": "Join",
+    "logOut": "Log out"
+  },
+  "home": {
+    "headline": "Collective minds.\nReal solutions.",
+    "subheading": "HiveCollective is where communities come together to name the problems that hold them back — and build solutions, together.",
+    "browseProblems": "Browse problems",
+    "joinTheHive": "Join the hive"
+  },
+  "problems": {
+    "title": "Problems",
+    "posted": "problem posted",
+    "postedPlural": "problems posted",
+    "allScopes": "All scopes",
+    "local": "Local",
+    "national": "National",
+    "filterLocation": "Filter by location…",
+    "clearFilters": "Clear filters",
+    "loading": "Loading…",
+    "noProblems": "No problems posted yet.",
+    "beFirst": "Be the first to post one",
+    "signUpToPost": "Sign up to post the first problem.",
+    "solutions": "solution",
+    "solutionsPlural": "solutions",
+    "by": "by"
+  },
+  "problemDetail": {
+    "backToProblems": "← Back to problems",
+    "postedBy": "Posted by",
+    "groups": "Groups",
+    "noGroups": "No groups yet — be the first to organise around this problem.",
+    "createGroup": "+ Create group",
+    "members": "member",
+    "membersPlural": "members",
+    "solutions": "Solutions",
+    "noSolutions": "No solutions yet.",
+    "beFirstSolution": "Be the first to propose one",
+    "signUpSolution": "Sign up to propose a solution.",
+    "proposeSolution": "+ Propose a solution",
+    "topSolution": "Top solution",
+    "score": "Score"
+  },
+  "postProblem": {
+    "title": "Post a problem",
+    "subtitle": "Describe a real challenge affecting your community, country, or region. Focus on societal problems — not personal ones.",
+    "problemTitle": "Problem title",
+    "titlePlaceholder": "e.g. Lack of clean drinking water in rural areas",
+    "description": "Description",
+    "descriptionPlaceholder": "Describe the problem in detail. Who does it affect? What are the consequences? What has been tried before?",
+    "scope": "Scope",
+    "location": "Location",
+    "locationPlaceholder": "e.g. Ghana or Accra",
+    "submit": "Post problem",
+    "submitting": "Posting…",
+    "back": "← Back"
+  },
+  "postSolution": {
+    "title": "Propose a solution",
+    "problem": "Problem",
+    "subtitle": "Describe your solution clearly. What should be done, by whom, and how? Focus on practical, actionable steps.",
+    "yourSolution": "Your solution",
+    "placeholder": "Describe your solution in detail…",
+    "submit": "Post solution",
+    "submitting": "Posting…",
+    "back": "← Back to problem"
+  },
+  "auth": {
+    "joinTitle": "Join HiveCollective",
+    "joinSubtitle": "Create an account to post problems, propose solutions, and join groups.",
+    "username": "Username",
+    "email": "Email",
+    "password": "Password",
+    "passwordHint": "At least 8 characters",
+    "language": "Preferred language",
+    "createAccount": "Create account",
+    "creating": "Creating account…",
+    "alreadyHaveAccount": "Already have an account?",
+    "signIn": "Sign in",
+    "signInTitle": "Sign in",
+    "signInSubtitle": "Welcome back to HiveCollective.",
+    "noAccount": "No account yet?",
+    "createOne": "Create one",
+    "signingIn": "Signing in…"
+  },
+  "group": {
+    "backToProblem": "← Back to problem",
+    "focusedOn": "Focused on",
+    "createdBy": "Created by",
+    "joinGroup": "Join this group",
+    "joining": "Joining…",
+    "leaveGroup": "Leave group",
+    "moderator": "Moderator",
+    "members": "Members",
+    "makeModerator": "Make moderator",
+    "mod": "mod"
+  },
+  "createGroup": {
+    "title": "Create a group",
+    "subtitle": "Groups bring people together around a specific problem. As the creator you become the moderator.",
+    "name": "Group name",
+    "namePlaceholder": "e.g. Clean Water Action Group — Ghana",
+    "description": "Description (optional)",
+    "descriptionPlaceholder": "What is this group trying to achieve? Who should join?",
+    "submit": "Create group",
+    "submitting": "Creating…",
+    "back": "← Back to problem"
+  },
+  "share": {
+    "shareOrExport": "Share or export:",
+    "exportPDF": "Export PDF",
+    "whatsapp": "WhatsApp",
+    "twitter": "Twitter / X",
+    "facebook": "Facebook"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "markAllRead": "Mark all read",
+    "none": "No notifications yet."
+  },
+  "errors": {
+    "couldNotLoad": "Could not load this problem.",
+    "couldNotConnect": "Could not connect to server.",
+    "signInRequired": "You need to be signed in.",
+    "signInButton": "Sign in"
+  }
+}

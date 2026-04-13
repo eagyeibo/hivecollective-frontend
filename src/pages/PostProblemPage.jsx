@@ -40,7 +40,7 @@ export default function PostProblemPage() {
     setLoading(true);
 
     try {
-      const res = await fetch(`${API_POST}/problems`, {
+      const res = await fetch(`${API}/problems`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

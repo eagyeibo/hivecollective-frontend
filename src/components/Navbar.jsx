@@ -19,11 +19,49 @@ export default function Navbar() {
     return location.pathname.startsWith(path);
   }
 
+  const ghostBtn = {
+    background: 'transparent',
+    border: '1px solid var(--border)',
+    color: 'var(--text-h)',
+    borderRadius: 'var(--radius-md)',
+    padding: '7px 16px',
+    fontSize: 13,
+    fontWeight: 500,
+    cursor: 'pointer',
+    boxShadow: 'none',
+  };
+
+  const primaryBtn = {
+    background: 'var(--accent)',
+    border: 'none',
+    color: '#fff',
+    borderRadius: 'var(--radius-md)',
+    padding: '7px 16px',
+    fontSize: 13,
+    fontWeight: 600,
+    cursor: 'pointer',
+  };
+
+  const navLink = (active) => ({
+    background: active ? 'var(--accent-bg)' : 'transparent',
+    border: `1px solid ${active ? 'var(--accent-border)' : 'transparent'}`,
+    color: active ? 'var(--accent)' : 'var(--text)',
+    borderRadius: 'var(--radius-md)',
+    padding: '6px 14px',
+    fontSize: 13,
+    fontWeight: active ? 600 : 400,
+    cursor: 'pointer',
+    boxShadow: 'none',
+    transform: 'none',
+  });
+
   return (
     <nav style={{
-      background: '#fff',
-      borderBottom: '0.5px solid #e5e5e5',
-      padding: '0 24px',
+      background: 'var(--surface)',
+      backdropFilter: 'blur(16px)',
+      WebkitBackdropFilter: 'blur(16px)',
+      borderBottom: '1px solid var(--border)',
+      padding: '0 20px',
       height: 56,
       display: 'flex',
       alignItems: 'center',
@@ -31,89 +69,85 @@ export default function Navbar() {
       position: 'sticky',
       top: 0,
       zIndex: 100,
+      gap: 12,
     }}>
 
-      {/* Left — logo */}
+      {/* Logo */}
       <div
         onClick={() => navigate('/')}
-        style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}
+        style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 9, flexShrink: 0 }}
       >
         <div style={{
-          width: 28, height: 28, background: '#1d4ed8', borderRadius: 7,
-          display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14,
+          width: 30, height: 30,
+          background: 'linear-gradient(135deg, var(--accent), var(--accent-2))',
+          borderRadius: 8,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: 16, color: '#fff',
+          boxShadow: '0 2px 10px rgba(124,34,240,0.38)',
+        }}>⬡</div>
+        <span style={{
+          fontSize: 15, fontWeight: 700, color: 'var(--text-h)',
+          fontFamily: 'var(--heading)', letterSpacing: '-0.3px',
         }}>
-          ⬡
-        </div>
-        <span style={{ fontSize: 15, fontWeight: 500, color: '#111' }}>
           HiveCollective
         </span>
       </div>
 
-      {/* Centre — navigation links */}
-      <div style={{ display: 'flex', gap: 4 }}>
-        <button
-          onClick={() => navigate('/problems')}
-          style={{
-            background: isActive('/problems') ? '#eff6ff' : 'none',
-            border: 'none', borderRadius: 8, padding: '6px 14px',
-            fontSize: 13,
-            fontWeight: isActive('/problems') ? 500 : 400,
-            color: isActive('/problems') ? '#1d4ed8' : '#444',
-            cursor: 'pointer',
-          }}
-        >
+      {/* Centre nav — hidden on mobile */}
+      <div className="nav-center" style={{ display: 'flex', gap: 2 }}>
+        <button onClick={() => navigate('/problems')} style={navLink(isActive('/problems'))}>
           {t('nav.problems')}
         </button>
       </div>
 
-      {/* Right — auth controls */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      {/* Right auth — full version (hidden on mobile) */}
+      <div className="hide-mobile" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         {isLoggedIn ? (
           <>
             <NotificationBell />
-            <span style={{ fontSize: 13, color: '#666' }}>{user.username}</span>
-            <button
-              onClick={() => navigate('/problems/new')}
-              style={{
-                background: '#1d4ed8', color: '#fff', border: 'none',
-                borderRadius: 8, padding: '7px 14px', fontSize: 13,
-                fontWeight: 500, cursor: 'pointer',
-              }}
-            >
+            <span style={{
+              fontSize: 12, color: 'var(--accent)', fontWeight: 600,
+              padding: '4px 10px',
+              background: 'var(--accent-bg)', borderRadius: 'var(--radius-md)',
+              border: '1px solid var(--accent-border)',
+            }}>
+              {user.username}
+            </span>
+            <button onClick={() => navigate('/problems/new')} style={primaryBtn}>
               {t('nav.postProblem')}
             </button>
-            <button
-              onClick={handleLogout}
-              style={{
-                background: 'none', border: '0.5px solid #ddd',
-                borderRadius: 8, padding: '7px 14px', fontSize: 13,
-                color: '#555', cursor: 'pointer',
-              }}
-            >
+            <button onClick={handleLogout} style={ghostBtn}>
               {t('nav.logOut')}
             </button>
           </>
         ) : (
           <>
-            <button
-              onClick={() => navigate('/login')}
-              style={{
-                background: 'none', border: '0.5px solid #ddd',
-                borderRadius: 8, padding: '7px 14px', fontSize: 13,
-                color: '#555', cursor: 'pointer',
-              }}
-            >
+            <button onClick={() => navigate('/login')} style={ghostBtn}>
               {t('nav.signIn')}
             </button>
-            <button
-              onClick={() => navigate('/register')}
-              style={{
-                background: '#1d4ed8', color: '#fff', border: 'none',
-                borderRadius: 8, padding: '7px 14px', fontSize: 13,
-                fontWeight: 500, cursor: 'pointer',
-              }}
-            >
+            <button onClick={() => navigate('/register')} style={primaryBtn}>
               {t('nav.join')}
+            </button>
+          </>
+        )}
+      </div>
+
+      {/* Mobile — condensed auth */}
+      <div className="show-mobile" style={{ alignItems: 'center', gap: 6 }}>
+        {isLoggedIn ? (
+          <>
+            <NotificationBell />
+            <button onClick={() => navigate('/problems/new')} style={{ ...primaryBtn, padding: '7px 12px', fontSize: 12 }}>
+              + Post
+            </button>
+          </>
+        ) : (
+          <>
+            <button onClick={() => navigate('/login')} style={{ ...ghostBtn, padding: '7px 12px', fontSize: 12 }}>
+              Sign in
+            </button>
+            <button onClick={() => navigate('/register')} style={{ ...primaryBtn, padding: '7px 12px', fontSize: 12 }}>
+              Join
             </button>
           </>
         )}

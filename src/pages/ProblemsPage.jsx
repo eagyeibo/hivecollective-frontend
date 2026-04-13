@@ -8,6 +8,51 @@ import { useAuth } from '../context/AuthContext';
 
 import API from '../config';
 
+const SCOPE_STYLE = {
+  national: {
+    badge: { background: 'var(--accent-bg)', color: 'var(--accent)', border: '1px solid var(--accent-border)' },
+    bar: 'var(--accent)',
+  },
+  local: {
+    badge: { background: 'var(--emerald-bg)', color: 'var(--emerald)', border: '1px solid var(--emerald-border)' },
+    bar: 'var(--emerald)',
+  },
+};
+
+function getScope(scope) {
+  return SCOPE_STYLE[scope] || {
+    badge: { background: 'var(--code-bg)', color: 'var(--text)', border: '1px solid var(--border)' },
+    bar: 'var(--text)',
+  };
+}
+
+// Small inline honeycomb decoration for the header
+function HexRow() {
+  const R = 10;
+  function pts(cx, cy) {
+    return Array.from({ length: 6 }, (_, i) => {
+      const a = (Math.PI / 3) * i - Math.PI / 6;
+      return `${(cx + R * Math.cos(a)).toFixed(1)},${(cy + R * Math.sin(a)).toFixed(1)}`;
+    }).join(' ');
+  }
+  const colors = ['var(--accent)', 'var(--honey)', 'var(--emerald)', 'var(--accent-2)', 'var(--accent)'];
+  const spacing = R * 1.732;
+  return (
+    <svg width={spacing * 5 + 4} height={R * 2 + 4} aria-hidden="true" style={{ display: 'block', marginBottom: 10 }}>
+      {colors.map((c, i) => (
+        <polygon
+          key={i}
+          points={pts(R + 2 + i * spacing, R + 2)}
+          fill={`${c.replace('var(', '').replace(')', '')}`.includes('--') ? 'none' : c}
+          stroke={c}
+          strokeWidth="1.5"
+          fillOpacity="0.12"
+        />
+      ))}
+    </svg>
+  );
+}
+
 export default function ProblemsPage() {
   const { isLoggedIn } = useAuth();
   const navigate = useNavigate();
@@ -41,29 +86,49 @@ export default function ProblemsPage() {
   }
 
   return (
-    <div style={{ maxWidth: 700, margin: '0 auto', padding: '40px 20px' }}>
+    <div style={{ maxWidth: 720, margin: '0 auto', padding: '40px 24px', textAlign: 'left' }}>
 
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 28 }}>
         <div>
-          <h1 style={{ fontSize: 22, fontWeight: 500, margin: '0 0 4px' }}>Problems</h1>
-          <p style={{ fontSize: 13, color: '#666', margin: 0 }}>
-            {problems.length} problem{problems.length !== 1 ? 's' : ''} posted
+          <HexRow />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
+            <h1 style={{
+              fontSize: 22, fontWeight: 700, margin: 0,
+              fontFamily: 'var(--heading)', letterSpacing: '-0.4px',
+              color: 'var(--text-h)',
+              borderLeft: '3px solid var(--accent)', paddingLeft: 12,
+            }}>
+              Problems
+            </h1>
+            {!loading && (
+              <span style={{
+                fontSize: 12, fontWeight: 700,
+                padding: '2px 9px', borderRadius: 20,
+                background: 'var(--accent-bg)', color: 'var(--accent)',
+                border: '1px solid var(--accent-border)',
+              }}>
+                {problems.length}
+              </span>
+            )}
+          </div>
+          <p style={{ fontSize: 13, color: 'var(--text)', margin: 0, paddingLeft: 15 }}>
+            Real challenges posted by the community
           </p>
         </div>
         {isLoggedIn && (
-          <button onClick={() => navigate('/problems/new')}>
+          <button onClick={() => navigate('/problems/new')} style={{ flexShrink: 0 }}>
             + Post a problem
           </button>
         )}
       </div>
 
       {/* Filters */}
-      <div style={{ display: 'flex', gap: 10, marginBottom: 24, flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', gap: 10, marginBottom: 28, flexWrap: 'wrap' }}>
         <select
           value={scopeFilter}
           onChange={e => setScopeFilter(e.target.value)}
-          style={{ minWidth: 140 }}
+          style={{ minWidth: 150, width: 'auto', flex: '0 0 auto' }}
         >
           <option value="">All scopes</option>
           <option value="local">Local</option>
@@ -78,69 +143,108 @@ export default function ProblemsPage() {
         />
 
         {(scopeFilter || locationFilter) && (
-          <button onClick={() => { setScopeFilter(''); setLocationFilter(''); }}>
-            Clear filters
+          <button
+            onClick={() => { setScopeFilter(''); setLocationFilter(''); }}
+            style={{
+              background: 'transparent', color: 'var(--text)',
+              border: '1px solid var(--border)', boxShadow: 'none',
+              padding: '8px 14px', fontSize: 13,
+            }}
+          >
+            Clear
           </button>
         )}
       </div>
 
-      {/* Problem list */}
-      {loading && <p style={{ color: '#666', fontSize: 13 }}>Loading…</p>}
+      {/* States */}
+      {loading && <p style={{ color: 'var(--text)', fontSize: 13, padding: '20px 0' }}>Loading…</p>}
       {error && <p style={{ color: '#b91c1c', fontSize: 13 }}>{error}</p>}
 
       {!loading && problems.length === 0 && (
-        <div style={{ textAlign: 'center', padding: '60px 0', color: '#666' }}>
-          <p style={{ fontSize: 15, marginBottom: 8 }}>No problems posted yet.</p>
+        <div style={{
+          textAlign: 'center', padding: '64px 0', color: 'var(--text)',
+          border: '1px dashed var(--border)', borderRadius: 'var(--radius-lg)',
+        }}>
+          <div style={{ fontSize: 40, marginBottom: 10, opacity: 0.25 }}>⬡</div>
+          <p style={{ fontSize: 15, marginBottom: 8, color: 'var(--text-h)', fontWeight: 500 }}>
+            No problems posted yet.
+          </p>
           {isLoggedIn
-            ? <button onClick={() => navigate('/problems/new')}>Be the first to post one</button>
+            ? <button onClick={() => navigate('/problems/new')} style={{ marginTop: 8 }}>Be the first to post one</button>
             : <p style={{ fontSize: 13 }}><a href="/register">Sign up</a> to post the first problem.</p>
           }
         </div>
       )}
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-        {problems.map(problem => (
-          <div
-            key={problem.id}
-            onClick={() => navigate(`/problems/${problem.id}`)}
-            style={{
-              background: '#fff',
-              border: '0.5px solid #e5e5e5',
-              borderRadius: 12,
-              padding: '16px 18px',
-              cursor: 'pointer',
-              transition: 'border-color .15s',
-            }}
-            onMouseEnter={e => e.currentTarget.style.borderColor = '#aaa'}
-            onMouseLeave={e => e.currentTarget.style.borderColor = '#e5e5e5'}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
-              <h2 style={{ fontSize: 15, fontWeight: 500, margin: '0 0 6px', lineHeight: 1.4 }}>
-                {problem.title}
-              </h2>
-              <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+      {/* Problem list */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        {problems.map(problem => {
+          const scope = getScope(problem.scope);
+          return (
+            <div
+              key={problem.id}
+              onClick={() => navigate(`/problems/${problem.id}`)}
+              style={{
+                background: 'var(--surface-raised)',
+                border: '1px solid var(--border)',
+                borderRadius: 'var(--radius-lg)',
+                borderLeft: `3px solid ${scope.bar}`,
+                padding: '18px 22px',
+                cursor: 'pointer',
+                transition: 'box-shadow var(--transition), border-color var(--transition), transform var(--transition)',
+                textAlign: 'left',
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.boxShadow = 'var(--shadow-hover)';
+                e.currentTarget.style.transform = 'translateY(-2px)';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.boxShadow = 'none';
+                e.currentTarget.style.transform = 'translateY(0)';
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
+                <h2 style={{
+                  fontSize: 15, fontWeight: 600, margin: '0 0 7px', lineHeight: 1.4,
+                  color: 'var(--text-h)', fontFamily: 'var(--heading)',
+                }}>
+                  {problem.title}
+                </h2>
                 <span style={{
-                  fontSize: 11, fontWeight: 500, padding: '2px 8px', borderRadius: 20,
-                  background: problem.scope === 'national' ? '#eff6ff' : '#f0fdf4',
-                  color: problem.scope === 'national' ? '#1d4ed8' : '#15803d',
+                  fontSize: 11, fontWeight: 700, padding: '3px 9px',
+                  borderRadius: 20, flexShrink: 0, ...scope.badge,
                 }}>
                   {problem.scope}
                 </span>
               </div>
+
+              <p style={{ fontSize: 13, color: 'var(--text)', margin: '0 0 12px', lineHeight: 1.6 }}>
+                {problem.description.length > 120
+                  ? problem.description.slice(0, 120) + '…'
+                  : problem.description}
+              </p>
+
+              <div style={{ fontSize: 12, color: 'var(--text)', display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+                <span style={{
+                  background: 'var(--code-bg)', padding: '2px 8px',
+                  borderRadius: 5, fontWeight: 500, color: 'var(--text-h)',
+                }}>
+                  {problem.location_tag}
+                </span>
+                <span>by {problem.posted_by}</span>
+                <span style={{
+                  marginLeft: 'auto',
+                  background: 'var(--honey-bg)', color: 'var(--honey)',
+                  border: '1px solid var(--honey-border)',
+                  padding: '2px 8px', borderRadius: 5, fontWeight: 600, fontSize: 11,
+                }}>
+                  {problem.solution_count} solution{problem.solution_count !== 1 ? 's' : ''}
+                </span>
+                <span>{new Date(problem.created_at).toLocaleDateString()}</span>
+              </div>
             </div>
-            <p style={{ fontSize: 13, color: '#555', margin: '0 0 10px', lineHeight: 1.5 }}>
-              {problem.description.length > 120
-                ? problem.description.slice(0, 120) + '…'
-                : problem.description}
-            </p>
-            <div style={{ fontSize: 12, color: '#888', display: 'flex', gap: 16 }}>
-              <span>{problem.location_tag}</span>
-              <span>by {problem.posted_by}</span>
-              <span>{problem.solution_count} solution{problem.solution_count !== 1 ? 's' : ''}</span>
-              <span>{new Date(problem.created_at).toLocaleDateString()}</span>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

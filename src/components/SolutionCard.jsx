@@ -5,8 +5,7 @@
 // ─────────────────────────────────────────────────────────────
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-
-const API_VOTE = 'http://localhost:3000/api';
+import API from '../config';
 
 export default function SolutionCard({ solution, problemId, isTop }) {
   const { token, isLoggedIn, user } = useAuth();
@@ -26,7 +25,7 @@ export default function SolutionCard({ solution, problemId, isTop }) {
 
     setVoting(true);
     try {
-      const res = await fetch(`${API_VOTE}/problems/${problemId}/solutions/${solution.id}/vote`, {
+      const res = await fetch(`${API}/problems/${problemId}/solutions/${solution.id}/vote`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

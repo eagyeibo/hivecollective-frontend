@@ -32,7 +32,7 @@ export default function NotificationBell() {
 
   async function fetchNotifications() {
     try {
-      const res = await fetch(`${API_NOTIF}/notifications`, {
+      const res = await fetch(`${API}/notifications`, {
         headers: { 'Authorization': `Bearer ${token}` },
       });
       const data = await res.json();
@@ -46,7 +46,7 @@ export default function NotificationBell() {
   }
 
   async function markRead(notifId) {
-    await fetch(`${API_NOTIF}/notifications/${notifId}/read`, {
+    await fetch(`${API}/notifications/${notifId}/read`, {
       method: 'PUT',
       headers: { 'Authorization': `Bearer ${token}` },
     });
@@ -55,7 +55,7 @@ export default function NotificationBell() {
   }
 
   async function markAllRead() {
-    await fetch(`${API_NOTIF}/notifications/read-all`, {
+    await fetch(`${API}/notifications/read-all`, {
       method: 'PUT',
       headers: { 'Authorization': `Bearer ${token}` },
     });

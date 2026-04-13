@@ -23,14 +23,14 @@ export default function ProblemDetailPage() {
   useEffect(() => {
   async function fetchProblem() {
     try {
-      const res = await fetch(`${API_DETAIL}/problems/${id}`);
+      const res = await fetch(`${API}/problems/${id}`);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
       setProblem(data.problem);
       setSolutions(data.solutions);
 
       // Also fetch groups for this problem
-      const groupRes = await fetch(`${API_DETAIL}/groups?problem_id=${id}`);
+      const groupRes = await fetch(`${API}/groups?problem_id=${id}`);
       const groupData = await groupRes.json();
       if (groupRes.ok) setGroups(groupData.groups);
 

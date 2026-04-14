@@ -313,9 +313,12 @@ function HomePage() {
 
 function Layout({ children }) {
   return (
-    <>
+     <>
       <Navbar />
-      <main>{children}</main>
+      <main style={{ position: 'relative', overflow: 'hidden' }}>
+        <HexCanvas />
+        {children}
+      </main>
     </>
   );
 }

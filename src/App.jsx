@@ -64,10 +64,10 @@ function HexCanvas() {
     let t = 0;
     function draw() {
       ctx.clearRect(0, 0, W, H);
-      t += 0.007;
+      t += 0.012;
       hexes.forEach(h => {
         const pulse = (Math.sin(t + h.phase) + 1) / 2;
-        const alpha = 0.025 + pulse * 0.04;
+        const alpha = 0.025 + pulse * 0.12;
         hexPath(h.x, h.y, h.R - 1);
         ctx.strokeStyle = `rgba(168,85,247,${alpha})`;
         ctx.lineWidth = 0.8;

@@ -20,8 +20,8 @@ export default function Navbar() {
   }
 
   const ghostBtn = {
-    background: 'transparent',
-    border: '1px solid var(--border)',
+    background: 'rgba(255,255,255,0.04)',
+    border: '1px solid rgba(255,255,255,0.1)',
     color: 'var(--text-h)',
     borderRadius: 'var(--radius-md)',
     padding: '7px 16px',
@@ -29,10 +29,11 @@ export default function Navbar() {
     fontWeight: 500,
     cursor: 'pointer',
     boxShadow: 'none',
+    transition: 'background 0.2s, border-color 0.2s',
   };
 
   const primaryBtn = {
-    background: 'var(--accent)',
+    background: 'linear-gradient(135deg, var(--accent), var(--accent-2))',
     border: 'none',
     color: '#fff',
     borderRadius: 'var(--radius-md)',
@@ -40,6 +41,7 @@ export default function Navbar() {
     fontSize: 13,
     fontWeight: 600,
     cursor: 'pointer',
+    boxShadow: '0 2px 12px rgba(124,34,240,0.38)',
   };
 
   const navLink = (active) => ({
@@ -57,10 +59,10 @@ export default function Navbar() {
 
   return (
     <nav style={{
-      background: 'var(--surface)',
-      backdropFilter: 'blur(16px)',
-      WebkitBackdropFilter: 'blur(16px)',
-      borderBottom: '1px solid var(--border)',
+      background: 'rgba(8,6,18,0.88)',
+      backdropFilter: 'blur(20px)',
+      WebkitBackdropFilter: 'blur(20px)',
+      borderBottom: '1px solid rgba(124,34,240,0.15)',
       padding: '0 20px',
       height: 56,
       display: 'flex',
@@ -83,24 +85,25 @@ export default function Navbar() {
           borderRadius: 8,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           fontSize: 16, color: '#fff',
-          boxShadow: '0 2px 10px rgba(124,34,240,0.38)',
+          boxShadow: '0 0 16px rgba(124,34,240,0.5)',
+          animation: 'hexGlow 3s ease-in-out infinite',
         }}>⬡</div>
         <span style={{
           fontSize: 15, fontWeight: 700, color: 'var(--text-h)',
-          fontFamily: 'var(--heading)', letterSpacing: '-0.3px',
+          fontFamily: 'var(--mono)', letterSpacing: '-0.3px',
         }}>
           HiveCollective
         </span>
       </div>
 
-      {/* Centre nav — hidden on mobile */}
+      {/* Centre nav */}
       <div className="nav-center" style={{ display: 'flex', gap: 2 }}>
         <button onClick={() => navigate('/problems')} style={navLink(isActive('/problems'))}>
           {t('nav.problems')}
         </button>
       </div>
 
-      {/* Right auth — full version (hidden on mobile) */}
+      {/* Right auth — desktop */}
       <div className="hide-mobile" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         {isLoggedIn ? (
           <>
@@ -110,8 +113,9 @@ export default function Navbar() {
               padding: '4px 10px',
               background: 'var(--accent-bg)', borderRadius: 'var(--radius-md)',
               border: '1px solid var(--accent-border)',
+              fontFamily: 'var(--mono)',
             }}>
-              {user.username}
+              @{user.username}
             </span>
             <button onClick={() => navigate('/problems/new')} style={primaryBtn}>
               {t('nav.postProblem')}
@@ -132,7 +136,7 @@ export default function Navbar() {
         )}
       </div>
 
-      {/* Mobile — condensed auth */}
+      {/* Mobile auth */}
       <div className="show-mobile" style={{ alignItems: 'center', gap: 6 }}>
         {isLoggedIn ? (
           <>

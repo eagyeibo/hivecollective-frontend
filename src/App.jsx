@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
+import { useEffect, useRef } from 'react';
 import Navbar from './components/Navbar';
 import RegisterPage from './pages/RegisterPage';
 import LoginPage from './pages/LoginPage';
@@ -8,130 +9,264 @@ import PostProblemPage from './pages/PostProblemPage';
 import PostSolutionPage from './pages/PostSolutionPage';
 import GroupPage from './pages/GroupPage';
 import CreateGroupPage from './pages/CreateGroupPage';
-
 import { useTranslation } from 'react-i18next';
 
-// ── Animated honeycomb background ────────────────────
-function HoneycombGrid({ opacity = 0.07 }) {
-  const R = 24;
-  const W = R * 1.7321;
-  const rowH = R * 1.5;
+// ── Animated hex canvas background ───────────────────
+function HexCanvas() {
+  const canvasRef = useRef(null);
 
-  function hexPts(cx, cy) {
-    const pts = [];
-    for (let i = 0; i < 6; i++) {
-      const a = (Math.PI / 3) * i - Math.PI / 6;
-      pts.push(`${(cx + R * Math.cos(a)).toFixed(1)},${(cy + R * Math.sin(a)).toFixed(1)}`);
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let animId;
+    let hexes = [];
+    let W, H;
+
+    function buildHexes() {
+      hexes = [];
+      const R = 22;
+      const cW = R * Math.sqrt(3);
+      const rH = R * 1.5;
+      const cols = Math.ceil(W / cW) + 2;
+      const rows = Math.ceil(H / rH) + 2;
+      for (let r = -1; r < rows; r++) {
+        for (let c = -1; c < cols; c++) {
+          hexes.push({
+            x: c * cW + (r % 2 === 1 ? cW / 2 : 0),
+            y: r * rH,
+            R,
+            phase: Math.random() * Math.PI * 2,
+          });
+        }
+      }
     }
-    return pts.join(' ');
-  }
 
-  const hexes = [];
-  for (let row = 0; row <= 14; row++) {
-    const offset = row % 2 === 1 ? W / 2 : 0;
-    for (let col = 0; col <= 26; col++) {
-      hexes.push(hexPts(col * W + offset, row * rowH));
+    function resize() {
+      W = canvas.offsetWidth;
+      H = canvas.offsetHeight;
+      canvas.width = W;
+      canvas.height = H;
+      buildHexes();
     }
-  }
 
-  const filled = [
-    { cx: 95,  cy: 88,  color: 'rgba(124,34,240,0.18)',  stroke: 'rgba(124,34,240,0.4)'  },
-    { cx: 980, cy: 200, color: 'rgba(245,158,11,0.16)',  stroke: 'rgba(245,158,11,0.4)'  },
-    { cx: 180, cy: 440, color: 'rgba(16,185,129,0.15)',  stroke: 'rgba(16,185,129,0.38)' },
-    { cx: 860, cy: 480, color: 'rgba(124,34,240,0.13)',  stroke: 'rgba(124,34,240,0.32)' },
-    { cx: 540, cy: 520, color: 'rgba(245,158,11,0.13)',  stroke: 'rgba(245,158,11,0.32)' },
-    { cx: 330, cy: 80,  color: 'rgba(16,185,129,0.13)',  stroke: 'rgba(16,185,129,0.3)'  },
-  ];
+    function hexPath(x, y, R) {
+      ctx.beginPath();
+      for (let i = 0; i < 6; i++) {
+        const a = (Math.PI / 3) * i - Math.PI / 6;
+        i === 0
+          ? ctx.moveTo(x + R * Math.cos(a), y + R * Math.sin(a))
+          : ctx.lineTo(x + R * Math.cos(a), y + R * Math.sin(a));
+      }
+      ctx.closePath();
+    }
+
+    let t = 0;
+    function draw() {
+      ctx.clearRect(0, 0, W, H);
+      t += 0.007;
+      hexes.forEach(h => {
+        const pulse = (Math.sin(t + h.phase) + 1) / 2;
+        const alpha = 0.025 + pulse * 0.04;
+        hexPath(h.x, h.y, h.R - 1);
+        ctx.strokeStyle = `rgba(168,85,247,${alpha})`;
+        ctx.lineWidth = 0.8;
+        ctx.stroke();
+      });
+      animId = requestAnimationFrame(draw);
+    }
+
+    resize();
+    window.addEventListener('resize', resize);
+    draw();
+
+    return () => {
+      cancelAnimationFrame(animId);
+      window.removeEventListener('resize', resize);
+    };
+  }, []);
 
   return (
-    <svg
+    <canvas
+      ref={canvasRef}
       aria-hidden="true"
       style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }}
-      viewBox="0 0 1126 600"
-      preserveAspectRatio="xMidYMid slice"
-    >
-      {/* Animated grid — breathes slowly */}
-      <g style={{ animation: 'hexBreathe 8s ease-in-out infinite' }}>
-        {hexes.map((p, i) => (
-          <polygon key={i} points={p} fill="none" stroke="var(--accent)" strokeWidth="1" />
-        ))}
-      </g>
-
-      {/* Filled accent hexes — float with staggered delays */}
-      {filled.map(({ cx, cy, color, stroke }, i) => (
-        <polygon
-          key={`f${i}`}
-          points={hexPts(cx, cy)}
-          fill={color}
-          stroke={stroke}
-          strokeWidth="1.5"
-          style={{
-            animation: `hexFloat ${3.5 + i * 0.7}s ease-in-out infinite`,
-            animationDelay: `${i * 0.55}s`,
-          }}
-        />
-      ))}
-    </svg>
+    />
   );
 }
 
-// ── Stat card data ────────────────────────────────────
-const STATS = [
-  { label: 'Open problems', value: '240+', color: 'var(--accent)',   bg: 'var(--accent-bg)',   border: 'var(--accent-border)'   },
-  { label: 'Active solvers', value: '1.2k', color: 'var(--honey)',   bg: 'var(--honey-bg)',    border: 'var(--honey-border)'    },
-  { label: 'Groups formed',  value: '89',   color: 'var(--emerald)', bg: 'var(--emerald-bg)',  border: 'var(--emerald-border)'  },
+// ── Live ticker bar ───────────────────────────────────
+const TICKER_ITEMS = [
+  { label: 'NEW PROBLEM', text: 'AI model bias in healthcare' },
+  { label: 'SOLVED', text: 'Supply chain optimization #42' },
+  { label: 'GROUP FORMED', text: 'Climate data visualization' },
+  { label: 'NEW SOLVER', text: '@kai_dev joined the hive' },
+  { label: 'BREAKTHROUGH', text: 'Distributed consensus algorithm' },
+  { label: 'NEW PROBLEM', text: 'Urban noise pollution mapping' },
+  { label: 'SOLVED', text: 'Real-time language translation' },
+  { label: 'GROUP FORMED', text: 'Open source medical imaging' },
 ];
 
+function Ticker() {
+  const items = [...TICKER_ITEMS, ...TICKER_ITEMS]; // duplicate for seamless loop
+  return (
+    <div style={{
+      position: 'absolute', bottom: 0, left: 0, right: 0, height: 34,
+      borderTop: '1px solid rgba(124,34,240,0.15)',
+      background: 'rgba(8,6,18,0.92)',
+      display: 'flex', alignItems: 'center', overflow: 'hidden', zIndex: 10,
+    }}>
+      <div style={{
+        padding: '0 14px', fontFamily: 'var(--mono)',
+        fontSize: 10, fontWeight: 600, color: 'var(--accent)',
+        letterSpacing: 1, textTransform: 'uppercase',
+        borderRight: '1px solid rgba(124,34,240,0.2)',
+        whiteSpace: 'nowrap', height: '100%',
+        display: 'flex', alignItems: 'center', flexShrink: 0,
+      }}>
+        ● LIVE
+      </div>
+      <div style={{
+        display: 'flex', gap: 48, alignItems: 'center',
+        padding: '0 24px', whiteSpace: 'nowrap',
+        animation: 'tickerScroll 28s linear infinite',
+      }}>
+        {items.map((item, i) => (
+          <span key={i} style={{ fontFamily: 'var(--mono)', fontSize: 10, color: '#6a6080', letterSpacing: 0.5 }}>
+            {item.label}{' '}
+            <span style={{ color: 'var(--emerald)' }}>{item.text}</span>
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ── Stat cards ────────────────────────────────────────
+const STATS = [
+  { label: 'Open problems', value: 240, suffix: '+', color: 'var(--accent)',   bg: 'var(--accent-bg)',   border: 'var(--accent-border)',   glow: 'rgba(124,34,240,0.22)'  },
+  { label: 'Active solvers', value: 1200, suffix: '',  color: 'var(--honey)',   bg: 'var(--honey-bg)',    border: 'var(--honey-border)',    glow: 'rgba(245,158,11,0.18)'  },
+  { label: 'Groups formed',  value: 89,  suffix: '',   color: 'var(--emerald)', bg: 'var(--emerald-bg)', border: 'var(--emerald-border)', glow: 'rgba(16,185,129,0.18)'  },
+];
+
+function StatCards() {
+  const refs = useRef([]);
+
+  useEffect(() => {
+    STATS.forEach((stat, i) => {
+      const el = refs.current[i];
+      if (!el) return;
+      const start = performance.now();
+      const duration = 1200 + i * 200;
+      function step(now) {
+        const p = Math.min((now - start) / duration, 1);
+        const ease = 1 - Math.pow(1 - p, 3);
+        el.textContent = Math.round(ease * stat.value) + stat.suffix;
+        if (p < 1) requestAnimationFrame(step);
+      }
+      setTimeout(() => requestAnimationFrame(step), 500);
+    });
+  }, []);
+
+  return (
+    <div className="stat-row" style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
+      {STATS.map((stat, i) => (
+        <div
+          key={stat.label}
+          className="stat-card"
+          style={{
+            textAlign: 'center', padding: '16px 28px',
+            background: stat.bg,
+            border: `1px solid ${stat.border}`,
+            borderRadius: 'var(--radius-lg)', minWidth: 110,
+            transition: 'transform 0.2s, box-shadow 0.2s',
+            cursor: 'default',
+          }}
+          onMouseEnter={e => {
+            e.currentTarget.style.transform = 'translateY(-3px)';
+            e.currentTarget.style.boxShadow = `0 8px 32px ${stat.glow}`;
+          }}
+          onMouseLeave={e => {
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.boxShadow = 'none';
+          }}
+        >
+          <div
+            ref={el => refs.current[i] = el}
+            style={{
+              fontSize: 28, fontWeight: 800,
+              fontFamily: 'var(--mono)',
+              color: stat.color,
+              letterSpacing: '-1px', lineHeight: 1.1,
+            }}
+          >
+            0
+          </div>
+          <div style={{ fontSize: 12, color: 'var(--text)', marginTop: 5, fontWeight: 500 }}>
+            {stat.label}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ── Home page ─────────────────────────────────────────
 function HomePage() {
   const navigate = useNavigate();
   const { t } = useTranslation();
 
   return (
     <div style={{
-      position: 'relative',
-      overflow: 'hidden',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
+      position: 'relative', overflow: 'hidden',
+      display: 'flex', flexDirection: 'column',
+      alignItems: 'center', justifyContent: 'center',
       minHeight: 'calc(100svh - 56px)',
-      padding: '60px 20px',
+      padding: '60px 20px 94px',
       textAlign: 'center',
     }}>
+      <HexCanvas />
 
-      <HoneycombGrid />
+      {/* Glow orbs */}
+      <div style={{ position: 'absolute', top: '-5%', left: '-5%', width: 500, height: 500, background: 'radial-gradient(circle, rgba(124,34,240,0.16) 0%, transparent 70%)', borderRadius: '50%', pointerEvents: 'none', animation: 'orbPulse 7s ease-in-out infinite' }} />
+      <div style={{ position: 'absolute', bottom: '5%', right: '-3%', width: 380, height: 380, background: 'radial-gradient(circle, rgba(245,158,11,0.12) 0%, transparent 70%)', borderRadius: '50%', pointerEvents: 'none', animation: 'orbPulse 7s ease-in-out 2s infinite' }} />
+      <div style={{ position: 'absolute', top: '50%', left: '50%', width: 360, height: 260, transform: 'translate(-50%,-50%)', background: 'radial-gradient(ellipse, rgba(16,185,129,0.09) 0%, transparent 70%)', pointerEvents: 'none', animation: 'orbPulse 7s ease-in-out 4s infinite' }} />
 
-      {/* Glow blobs */}
-      <div style={{ position: 'absolute', top: '15%', left: '10%', width: 420, height: 420, background: 'radial-gradient(circle, rgba(124,34,240,0.13) 0%, transparent 70%)', borderRadius: '50%', pointerEvents: 'none' }} />
-      <div style={{ position: 'absolute', bottom: '15%', right: '10%', width: 340, height: 340, background: 'radial-gradient(circle, rgba(245,158,11,0.12) 0%, transparent 70%)', borderRadius: '50%', pointerEvents: 'none' }} />
-      <div style={{ position: 'absolute', top: '55%', left: '55%', width: 380, height: 260, transform: 'translate(-50%, -50%)', background: 'radial-gradient(ellipse, rgba(16,185,129,0.09) 0%, transparent 70%)', pointerEvents: 'none' }} />
+      {/* Scan lines */}
+      <div aria-hidden="true" style={{
+        position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 1,
+        background: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.025) 2px, rgba(0,0,0,0.025) 4px)',
+      }} />
 
-      {/* Content — each block fades up with staggered delay */}
-      <div style={{ position: 'relative', zIndex: 1, maxWidth: 660, width: '100%' }}>
+      {/* Content */}
+      <div style={{ position: 'relative', zIndex: 2, maxWidth: 660, width: '100%' }}>
 
+        {/* Live badge */}
         <div style={{
-          width: 56, height: 56,
-          background: 'linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%)',
-          borderRadius: 16,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: 28, color: '#fff',
-          margin: '0 auto 30px',
-          boxShadow: '0 6px 28px rgba(124,34,240,0.42)',
+          display: 'inline-flex', alignItems: 'center', gap: 7,
+          padding: '5px 14px', borderRadius: 100,
+          background: 'var(--accent-bg)',
+          border: '1px solid var(--accent-border)',
+          fontSize: 11, fontWeight: 600, letterSpacing: '1.2px',
+          textTransform: 'uppercase', color: 'var(--accent)',
+          marginBottom: 28,
           animation: 'fadeUp 0.5s ease both',
-        }}>⬡</div>
+        }}>
+          <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--accent)', display: 'inline-block', animation: 'blink 1.5s ease-in-out infinite' }} />
+          Collective Intelligence Platform
+        </div>
 
         <h1 style={{
           fontSize: 'clamp(32px, 5.5vw, 64px)',
           fontWeight: 800,
           letterSpacing: '-2.5px',
-          lineHeight: 1.06,
+          lineHeight: 1.04,
           margin: '0 0 22px',
-          background: 'linear-gradient(130deg, var(--accent) 0%, var(--accent-2) 52%, var(--emerald) 100%)',
+          background: 'linear-gradient(130deg, var(--accent) 0%, var(--accent-2) 48%, var(--emerald) 100%)',
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
           backgroundClip: 'text',
-          animation: 'fadeUp 0.5s ease both',
-          animationDelay: '0.1s',
+          animation: 'fadeUp 0.5s ease 0.1s both',
         }}>
           {t('home.headline').split('\n').map((line, i) => (
             <span key={i}>{line}{i === 0 && <br />}</span>
@@ -139,21 +274,17 @@ function HomePage() {
         </h1>
 
         <p style={{
-          fontSize: 18,
-          color: 'var(--text)',
-          lineHeight: 1.7,
-          maxWidth: 460,
-          margin: '0 auto 40px',
-          animation: 'fadeUp 0.5s ease both',
-          animationDelay: '0.2s',
+          fontSize: 18, color: 'var(--text)', lineHeight: 1.7,
+          maxWidth: 460, margin: '0 auto 40px',
+          animation: 'fadeUp 0.5s ease 0.2s both',
         }}>
           {t('home.subheading')}
         </p>
 
         <div style={{
           display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap',
-          animation: 'fadeUp 0.5s ease both',
-          animationDelay: '0.3s',
+          marginBottom: 56,
+          animation: 'fadeUp 0.5s ease 0.3s both',
         }}>
           <button onClick={() => navigate('/problems')} style={{ padding: '13px 30px', fontSize: 15, fontWeight: 600 }}>
             {t('home.browseProblems')}
@@ -170,39 +301,12 @@ function HomePage() {
           </button>
         </div>
 
-        {/* Colored stat cards */}
-        <div
-          className="stat-row"
-          style={{
-            display: 'flex', gap: 14, justifyContent: 'center', marginTop: 56,
-            flexWrap: 'wrap',
-            animation: 'fadeUp 0.5s ease both',
-            animationDelay: '0.4s',
-          }}
-        >
-          {STATS.map(stat => (
-            <div
-              key={stat.label}
-              className="stat-card"
-              style={{
-                textAlign: 'center', padding: '16px 28px',
-                background: stat.bg, border: `1px solid ${stat.border}`,
-                borderRadius: 'var(--radius-lg)', minWidth: 110,
-              }}
-            >
-              <div style={{
-                fontSize: 28, fontWeight: 800, fontFamily: 'var(--heading)',
-                color: stat.color, letterSpacing: '-1px', lineHeight: 1.1,
-              }}>
-                {stat.value}
-              </div>
-              <div style={{ fontSize: 12, color: 'var(--text)', marginTop: 4, fontWeight: 500 }}>
-                {stat.label}
-              </div>
-            </div>
-          ))}
+        <div style={{ animation: 'fadeUp 0.5s ease 0.4s both' }}>
+          <StatCards />
         </div>
       </div>
+
+      <Ticker />
     </div>
   );
 }

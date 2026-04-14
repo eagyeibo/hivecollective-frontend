@@ -1,21 +1,19 @@
-// ─────────────────────────────────────────────────────────────
 // src/pages/ProblemsPage.jsx
-// Browse all problems — with filter by scope and location
-// ─────────────────────────────────────────────────────────────
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-
 import API from '../config';
 
 const SCOPE_STYLE = {
   national: {
     badge: { background: 'var(--accent-bg)', color: 'var(--accent)', border: '1px solid var(--accent-border)' },
     bar: 'var(--accent)',
+    glow: 'rgba(168,85,247,0.18)',
   },
   local: {
     badge: { background: 'var(--emerald-bg)', color: 'var(--emerald)', border: '1px solid var(--emerald-border)' },
     bar: 'var(--emerald)',
+    glow: 'rgba(52,211,153,0.15)',
   },
 };
 
@@ -23,10 +21,11 @@ function getScope(scope) {
   return SCOPE_STYLE[scope] || {
     badge: { background: 'var(--code-bg)', color: 'var(--text)', border: '1px solid var(--border)' },
     bar: 'var(--text)',
+    glow: 'rgba(255,255,255,0.05)',
   };
 }
 
-// Small inline honeycomb decoration for the header
+// Animated hex decoration for the header
 function HexRow() {
   const R = 10;
   function pts(cx, cy) {
@@ -43,13 +42,38 @@ function HexRow() {
         <polygon
           key={i}
           points={pts(R + 2 + i * spacing, R + 2)}
-          fill={`${c.replace('var(', '').replace(')', '')}`.includes('--') ? 'none' : c}
+          fill="none"
           stroke={c}
           strokeWidth="1.5"
-          fillOpacity="0.12"
+          opacity="0.55"
+          style={{ animation: `hexFloat ${2.5 + i * 0.4}s ease-in-out infinite`, animationDelay: `${i * 0.3}s` }}
         />
       ))}
     </svg>
+  );
+}
+
+// Skeleton loader card
+function SkeletonCard() {
+  return (
+    <div style={{
+      background: 'rgba(15,11,32,0.6)',
+      border: '1px solid var(--border)',
+      borderRadius: 'var(--radius-lg)',
+      borderLeft: '3px solid var(--border)',
+      padding: '18px 22px',
+      overflow: 'hidden', position: 'relative',
+    }}>
+      <div style={{ height: 14, width: '60%', background: 'rgba(255,255,255,0.06)', borderRadius: 4, marginBottom: 10, position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.04), transparent)', animation: 'shimmer 1.5s infinite' }} />
+      </div>
+      <div style={{ height: 10, width: '85%', background: 'rgba(255,255,255,0.04)', borderRadius: 4, marginBottom: 6, position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.04), transparent)', animation: 'shimmer 1.5s 0.2s infinite' }} />
+      </div>
+      <div style={{ height: 10, width: '40%', background: 'rgba(255,255,255,0.04)', borderRadius: 4, position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.04), transparent)', animation: 'shimmer 1.5s 0.4s infinite' }} />
+      </div>
+    </div>
   );
 }
 
@@ -62,9 +86,7 @@ export default function ProblemsPage() {
   const [scopeFilter, setScopeFilter] = useState('');
   const [locationFilter, setLocationFilter] = useState('');
 
-  useEffect(() => {
-    fetchProblems();
-  }, [scopeFilter, locationFilter]);
+  useEffect(() => { fetchProblems(); }, [scopeFilter, locationFilter]);
 
   async function fetchProblems() {
     setLoading(true);
@@ -72,13 +94,11 @@ export default function ProblemsPage() {
       const params = new URLSearchParams();
       if (scopeFilter) params.append('scope', scopeFilter);
       if (locationFilter) params.append('location', locationFilter);
-
       const res = await fetch(`${API}/problems?${params}`);
       const data = await res.json();
-
       if (!res.ok) throw new Error(data.error);
       setProblems(data.problems);
-    } catch (err) {
+    } catch {
       setError('Could not load problems.');
     } finally {
       setLoading(false);
@@ -103,7 +123,7 @@ export default function ProblemsPage() {
             </h1>
             {!loading && (
               <span style={{
-                fontSize: 12, fontWeight: 700,
+                fontSize: 12, fontWeight: 700, fontFamily: 'var(--mono)',
                 padding: '2px 9px', borderRadius: 20,
                 background: 'var(--accent-bg)', color: 'var(--accent)',
                 border: '1px solid var(--accent-border)',
@@ -156,16 +176,32 @@ export default function ProblemsPage() {
         )}
       </div>
 
-      {/* States */}
-      {loading && <p style={{ color: 'var(--text)', fontSize: 13, padding: '20px 0' }}>Loading…</p>}
-      {error && <p style={{ color: '#b91c1c', fontSize: 13 }}>{error}</p>}
+      {/* Skeleton loading */}
+      {loading && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {[1, 2, 3].map(i => <SkeletonCard key={i} />)}
+        </div>
+      )}
 
+      {error && (
+        <div style={{
+          background: 'rgba(185,28,28,0.1)', border: '1px solid rgba(185,28,28,0.3)',
+          borderRadius: 'var(--radius-md)', padding: '12px 16px',
+          fontSize: 13, color: '#f87171',
+        }}>
+          {error}
+        </div>
+      )}
+
+      {/* Empty state */}
       {!loading && problems.length === 0 && (
         <div style={{
           textAlign: 'center', padding: '64px 0', color: 'var(--text)',
-          border: '1px dashed var(--border)', borderRadius: 'var(--radius-lg)',
+          border: '1px dashed rgba(168,85,247,0.2)',
+          borderRadius: 'var(--radius-lg)',
+          background: 'rgba(168,85,247,0.03)',
         }}>
-          <div style={{ fontSize: 40, marginBottom: 10, opacity: 0.25 }}>⬡</div>
+          <div style={{ fontSize: 40, marginBottom: 10, opacity: 0.2 }}>⬡</div>
           <p style={{ fontSize: 15, marginBottom: 8, color: 'var(--text-h)', fontWeight: 500 }}>
             No problems posted yet.
           </p>
@@ -178,29 +214,34 @@ export default function ProblemsPage() {
 
       {/* Problem list */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        {problems.map(problem => {
+        {problems.map((problem, idx) => {
           const scope = getScope(problem.scope);
           return (
             <div
               key={problem.id}
               onClick={() => navigate(`/problems/${problem.id}`)}
               style={{
-                background: 'var(--surface-raised)',
+                background: 'rgba(15,11,32,0.7)',
                 border: '1px solid var(--border)',
                 borderRadius: 'var(--radius-lg)',
                 borderLeft: `3px solid ${scope.bar}`,
                 padding: '18px 22px',
                 cursor: 'pointer',
-                transition: 'box-shadow var(--transition), border-color var(--transition), transform var(--transition)',
+                transition: 'box-shadow 0.2s, border-color 0.2s, transform 0.2s',
                 textAlign: 'left',
+                backdropFilter: 'blur(8px)',
+                animation: `fadeUp 0.4s ease ${idx * 0.05}s both`,
+                position: 'relative', overflow: 'hidden',
               }}
               onMouseEnter={e => {
-                e.currentTarget.style.boxShadow = 'var(--shadow-hover)';
+                e.currentTarget.style.boxShadow = `0 8px 32px ${scope.glow}, 0 0 0 1px rgba(168,85,247,0.1)`;
                 e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.borderColor = 'rgba(168,85,247,0.25)';
               }}
               onMouseLeave={e => {
                 e.currentTarget.style.boxShadow = 'none';
                 e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.borderColor = 'var(--border)';
               }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
@@ -212,7 +253,8 @@ export default function ProblemsPage() {
                 </h2>
                 <span style={{
                   fontSize: 11, fontWeight: 700, padding: '3px 9px',
-                  borderRadius: 20, flexShrink: 0, ...scope.badge,
+                  borderRadius: 20, flexShrink: 0, letterSpacing: '0.3px',
+                  textTransform: 'uppercase', ...scope.badge,
                 }}>
                   {problem.scope}
                 </span>
@@ -226,8 +268,9 @@ export default function ProblemsPage() {
 
               <div style={{ fontSize: 12, color: 'var(--text)', display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
                 <span style={{
-                  background: 'var(--code-bg)', padding: '2px 8px',
+                  background: 'rgba(255,255,255,0.06)', padding: '2px 8px',
                   borderRadius: 5, fontWeight: 500, color: 'var(--text-h)',
+                  fontFamily: 'var(--mono)', fontSize: 11,
                 }}>
                   {problem.location_tag}
                 </span>
@@ -237,10 +280,11 @@ export default function ProblemsPage() {
                   background: 'var(--honey-bg)', color: 'var(--honey)',
                   border: '1px solid var(--honey-border)',
                   padding: '2px 8px', borderRadius: 5, fontWeight: 600, fontSize: 11,
+                  fontFamily: 'var(--mono)',
                 }}>
                   {problem.solution_count} solution{problem.solution_count !== 1 ? 's' : ''}
                 </span>
-                <span>{new Date(problem.created_at).toLocaleDateString()}</span>
+                <span style={{ opacity: 0.6 }}>{new Date(problem.created_at).toLocaleDateString()}</span>
               </div>
             </div>
           );

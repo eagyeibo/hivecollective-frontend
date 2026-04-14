@@ -250,7 +250,7 @@ function HomePage() {
           fontSize: 11, fontWeight: 600, letterSpacing: '1.2px',
           textTransform: 'uppercase', color: 'var(--accent)',
           marginBottom: 28,
-          animation: 'fadeUp 0.5s ease both',
+          animation: 'fadeUp 0.9s ease both',
         }}>
           <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--accent)', display: 'inline-block', animation: 'blink 1.5s ease-in-out infinite' }} />
           Collective Intelligence Platform
@@ -266,7 +266,7 @@ function HomePage() {
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
           backgroundClip: 'text',
-          animation: 'fadeUp 0.5s ease 0.1s both',
+          animation: 'fadeUp 0.9s ease 0.1s both',
         }}>
           {t('home.headline').split('\n').map((line, i) => (
             <span key={i}>{line}{i === 0 && <br />}</span>
@@ -276,7 +276,7 @@ function HomePage() {
         <p style={{
           fontSize: 18, color: 'var(--text)', lineHeight: 1.7,
           maxWidth: 460, margin: '0 auto 40px',
-          animation: 'fadeUp 0.5s ease 0.2s both',
+          animation: 'fadeUp 0.9s ease 0.2s both',
         }}>
           {t('home.subheading')}
         </p>
@@ -284,7 +284,7 @@ function HomePage() {
         <div style={{
           display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap',
           marginBottom: 56,
-          animation: 'fadeUp 0.5s ease 0.3s both',
+          animation: 'fadeUp 0.9s ease 0.3s both',
         }}>
           <button onClick={() => navigate('/problems')} style={{ padding: '13px 30px', fontSize: 15, fontWeight: 600 }}>
             {t('home.browseProblems')}
@@ -301,7 +301,7 @@ function HomePage() {
           </button>
         </div>
 
-        <div style={{ animation: 'fadeUp 0.5s ease 0.4s both' }}>
+        <div style={{ animation: 'fadeUp 0.9s ease 0.4s both' }}>
           <StatCards />
         </div>
       </div>
